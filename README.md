@@ -1,2 +1,2 @@
 # holygrid
-A modern, flexible and semantic grid system for SCSS.
+A grid system written in SCSS to solve real world layout problems.
