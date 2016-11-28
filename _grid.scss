@@ -1,0 +1,279 @@
+//
+// Configuration
+//
+
+// General
+$columns: 12 !default;
+$gutters: 20px !default;
+$gutterType: border !default; // padding/border
+$inline: false !default; // true = 'flex', false = 'inline-flex'
+$equalHeights: false !default;
+$colPrefix: col-;
+
+// Viewport definitions
+$xxl: 1920px !default;
+$xl:  1600px !default;
+$l:   1280px !default;
+$m:   960px !default;
+$s:   640px !default;
+$xs:  480px !default;
+$xxs: 320px !default;
+
+// Breakpoint definitions
+$breakpoints: (
+  xxs  "(min-width: #{$xxs})",
+  xs   "(min-width: #{$xs})",
+  s    "(min-width: #{$s})",
+  m    "(min-width: #{$m})",
+  l    "(min-width: #{$l})",
+  xl   "(min-width: #{$xl})",
+  xxl  "(min-width: #{$xxl})"
+) !default;
+
+
+//
+// Functions
+//
+
+// Width
+@function width($width) {
+  @return (100% / $columns) * $width;
+}
+
+
+//
+// Mixins
+//
+
+// Grid basic styles
+@mixin grid() {
+
+  // Inline or block grid
+  @if $inline == true {
+    display: inline-flex;
+  } @else {
+    display: flex;
+  }
+
+  // Horizontal flow and wrap elements to new lines
+  flex-flow: row wrap;
+
+  // Equal/Variable heights
+  @if $equalHeights == true {
+    align-items: stretch;
+  } @else {
+    align-items: flex-start;
+  }
+
+  // Absorb the gutters
+  margin-left: -$gutters;
+}
+
+// Column basic styles
+@mixin column() {
+  width: 100%;
+
+  @if $gutterType == border {
+    border-left: $gutters solid transparent;
+  } @else {
+    padding-left: $gutters;
+  }
+}
+
+// Offset columns
+// $amount: the positive/negative amount of columns
+@mixin offset($amount) {
+  margin-left: width($amount);
+}
+
+// Breakpoints mixin
+@mixin breakpoint($point) {
+  @each $breakpoint in $breakpoints {
+    $name: nth($breakpoint, 1);
+    $query: nth($breakpoint, 2);
+
+    @if ($name == $point) {
+      @media #{$query} { @content }
+    }
+  }
+}
+
+// Set responsive properties for each breakpoint
+// Example 1: @include responsive(font-size, xs 12px, m 16px, l 18px);
+// Example 2:
+// TODO: add multiple values support (for box-shadow etc...)
+@mixin responsive($prop, $values...) {
+  @if type-of(nth($values, 1)) == map {
+    @each $current in nth($values, 1) {
+      @include breakpoint(nth($current, 1)) {
+        #{$prop}: nth($current, 2);
+      }
+    }
+  } @else {
+    @for $current from 1 through length($values) {
+      $value: nth($values, $current);
+      @include breakpoint(nth($value, 1)) {
+        #{$prop}: nth($value, 2);
+      }
+    }
+  }
+}
+
+// Set the grid gutters
+// $multiplier: the gutters multiplier (0=no gutters, 1=normal, 2=double...)
+@mixin grid-gutters($multiplier: 1) {
+  margin-left: -$gutters*$multiplier;
+
+  > [class*="#{$colPrefix}"] {
+    @if $gutterType == border {
+      border-left: $gutters*$multiplier solid transparent;
+    } @else {
+      padding-left: $gutters*$multiplier;
+    }
+  }
+}
+
+// Default class helpers .col-1, .col-2, .col-3 ...
+@mixin grid-classes() {
+  @for $n from 1 through $columns {
+    .#{$colPrefix}#{$n} {
+      width: width($n);
+    }
+  }
+}
+
+// Responsive class helpers .col-1@m, .col-3@s, .hide@xl ...
+@mixin grid-responsive-classes() {
+  @each $breakpoint in $breakpoints {
+    $key: nth($breakpoint, 1);
+    $value: nth($breakpoint, 2);
+
+    @include breakpoint($key) {
+
+      // Columns helpers
+      @for $n from 1 through $columns {
+        .#{$colPrefix}#{$n}\@#{$key} {
+          width: width($n);
+        }
+      }
+
+      // Visibility helpers
+      // .hide\@#{$key} {
+      //   display: none !important;
+      // }
+    }
+  }
+}
+
+
+//
+// Implementation
+//
+
+// This is required for the gutters to work
+html { box-sizing: border-box; }
+*, *:before, *:after { box-sizing: inherit; }
+
+// The grid
+.grid {
+  @include grid();
+  height: 100%;
+}
+
+// The columns
+[class*="#{$colPrefix}"] {
+  @include column();
+}
+
+// Generate the responsive class helpers
+@include grid-responsive-classes();
+
+
+//
+// Modifiers
+//
+
+// Remove gutters between the columns
+.grid-no-gutters {
+  @include grid-gutters(0);
+}
+
+.grid-double-gutters {
+  @include grid-gutters(2);
+}
+
+// Align the columns horizontally in the center
+.grid-center {
+  justify-content: center;
+}
+
+// Align the columns horizontally on the left
+.grid-left {
+  justify-content: flex-start;
+}
+
+// Align the columns horizontally on the right
+.grid-right {
+  justify-content: flex-end;
+}
+
+// Align the columns horizontally to the edges
+.grid-justify {
+  justify-content: space-between;
+}
+
+// Align the columns horizontally to the edges with bleed
+.grid-justify-center {
+  justify-content: space-around;
+}
+
+// Align the columns vertically to the top
+.grid-top {
+  align-items: flex-start;
+}
+
+// Align the columns vertically to the bottom
+.grid-bottom {
+  align-items: flex-end;
+}
+
+// Align the columns vertically to the middle
+.grid-middle {
+  align-items: center;
+}
+
+// Pack the columns at the top
+.grid-pack-top {
+  align-content: flex-start;
+}
+
+// Pack the columns at the bottom
+.grid-pack-bottom {
+  align-content: flex-end;
+}
+
+// Justify the columns vertically to the edges
+.grid-pack-justify {
+  align-content: space-between;
+}
+
+// Justify the columns vertically to the edges with bleed
+.grid-pack-justify-center {
+  align-content: space-around;
+}
+
+// Same height columns
+// Note: it doesn't work in conjunction with grid-pack-justify
+.grid-equal-heights {
+  align-items: stretch;
+}
+
+// Flexible column, the width depends on its content
+.col-flexible {
+  width: auto;
+}
+
+// Expandable column, fills the available space
+.col-expandable {
+  flex: 1;
+}

@@ -1,0 +1,61 @@
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  // Show current breakpoint
+  &:before {
+    content: '<XXS';
+    @include responsive(content, xxs 'XXS', xs 'XS', s 'S', m 'M', l 'L', xl 'XL', xxl 'XXL');
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 16px 20px;
+    z-index: 2;
+    color: #fff;
+    background-color: #333;
+  }
+}
+
+.container {
+  @include responsive(max-width, xs 680px, m 960px, l 1280px);
+  // transition: max-width 0.3s ease;
+  margin: 0 auto;
+  background-color: #f4f4f4;
+  display: flex; // ie10 fix for min-height:vh
+  flex-direction: column; // ie10 fix for min-height:vh
+}
+
+[class*="#{$colPrefix}"] {
+  display: block;
+  color: #333;
+  background-clip: padding-box;
+  background-color: #ddd;
+  padding: 16px;
+}
+
+.section1 {
+  min-height: 30vh;
+
+  @include responsive(font-size, xs 14px, m 16px, l 18px);
+
+  @include responsive(text-shadow, (
+    xs: 0 0 10px #ffff00,
+    m: 0 0 20px #0000ff,
+    l: 0 0 30px #ff0000
+  ));
+}
+
+.section2 {
+  position: relative;
+  height: 50vh;
+}
+
+.section3 {
+  min-height: 20vh;
+}
+
+.col-test {
+  // @include responsive(width, m 25%, l 20%);
+}
